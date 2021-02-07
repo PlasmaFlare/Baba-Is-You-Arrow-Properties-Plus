@@ -88,8 +88,10 @@ function movecommand(ox,oy,dir_,playerid_,dir_2)
 			if (take == 1) then
 				local players = {}
 				local players2 = {}
+				local players3 = {}
 				local empty = {}
 				local empty2 = {}
+				local empty3 = {}
 				
 				if (playerid == 1) then
 					players,empty = findallfeature(nil,"is","you")
@@ -110,6 +112,10 @@ function movecommand(ox,oy,dir_,playerid_,dir_2)
 					for i,v in ipairs(empty2) do
 						table.insert(empty, v)
 					end
+				end
+				
+				if (featureindex["debugtest"] ~= nil) then
+					players3,empty3 = findallfeature(nil,"is","debugtest")
 				end
 				
 				local fdir = 4
@@ -181,6 +187,68 @@ function movecommand(ox,oy,dir_,playerid_,dir_2)
 									table.insert(moving_units, {unitid = 2, reason = "you", state = 0, moves = 1, dir = fdir, xpos = x, ypos = y})
 									been_seen[v] = #moving_units
 								end
+							end
+						else
+							local id = been_seen[v]
+							local this = moving_units[id]
+							--this.moves = this.moves + 1
+						end
+					end
+				end
+				
+				fdir = 4
+				
+				for i,v in ipairs(players3) do
+					local sleeping = false
+					local domove = false
+					local turndir = 0
+					local ox,oy = 0,0
+					
+					if (v ~= 2) then
+						local unit = mmf.newObject(v)
+						
+						local udir = unit.values[DIR]
+						local ndrs = ndirs[udir + 1]
+						ox,oy = ndrs[1],ndrs[2]
+						
+						if (dir_ == 1) then
+							domove = true
+						elseif (dir_ == 0) then
+							turndir = -1
+						elseif (dir_ == 2) then
+							turndir = 1
+			end
+			
+						fdir = (udir + turndir + 4) % 4
+						
+						local unitname = getname(unit)
+						local sleep = hasfeature(unitname,"is","sleep",v)
+						local still = cantmove(unitname,v,fdir)
+						
+						if (sleep ~= nil) then
+							sleeping = true
+						elseif still then
+							sleeping = true
+							
+							if (fdir ~= 4) then
+								updatedir(v, fdir)
+							end
+						else
+							if (fdir ~= 4) then
+								updatedir(v, fdir)
+							end
+						end
+			end
+			
+					if (sleeping == false) and (fdir ~= 4) and domove then
+						if (been_seen[v] == nil) then
+							local x,y = -1,-1
+							if (v ~= 2) then
+								local unit = mmf.newObject(v)
+								x,y = unit.values[XPOS],unit.values[YPOS]
+								
+								table.insert(moving_units, {unitid = v, reason = "you", state = 0, moves = 1, dir = fdir, xpos = x, ypos = y})
+								been_seen[v] = #moving_units
 							end
 						else
 							local id = been_seen[v]
@@ -445,6 +513,10 @@ function movecommand(ox,oy,dir_,playerid_,dir_2)
 						if (state == 0) then
 							if (data.reason == "move") and (data.unitid == 2) and (dir == 4) then
 								dir = fixedrandom(0,3)
+								
+								if cantmove(name,data.unitid,dir,x,y) then
+									skipthis = true
+							end
 							end
 						elseif (state == 3) then
 							if ((data.reason == "move") or (data.reason == "chill")) then
@@ -472,6 +544,10 @@ function movecommand(ox,oy,dir_,playerid_,dir_2)
 						
 						if (dir == 4) then
 							dir = fixedrandom(0,3)
+							
+							if cantmove(name,data.unitid,dir,x,y) then
+								skipthis = true
+							end
 						end
 						
 						local olddir = dir
@@ -838,7 +914,7 @@ function movecommand(ox,oy,dir_,playerid_,dir_2)
 		HACK_MOVES = 0
 		HACK_INFINITY = 200
 		destroylevel("infinity")
-
+		return
 	end
 	
 	-- @ Turning text
@@ -862,5 +938,13 @@ function movecommand(ox,oy,dir_,playerid_,dir_2)
 	
 	if (dir_ ~= nil) then
 		mapcursor_move(ox,oy,dir_)
+	end
+	
+	local vistest,vt2 = findallfeature(nil,"is","debugtest")
+	if (#vistest > 0) or (#vt2 > 0) then
+		local target = vistest[1] or vt[1]
+		visionmode(1,target,nil)
+	else
+		visionmode(0)
 	end
 end

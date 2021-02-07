@@ -7,6 +7,13 @@ Best if you look at some gifs for a full explaination:
 <img src="turning_fall.gif" alt="drawing" width="800"/>
 <img src="turning_text.gif" alt="drawing" width="800"/>
 
+# Changelog
+
+- **1.0.1** (2/7/21)
+  - Updated for beta 393
+
+- **1.0.0** (1/24/21)
+  - Initial release
 
 # Installation
 
