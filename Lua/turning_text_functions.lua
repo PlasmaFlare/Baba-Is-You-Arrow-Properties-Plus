@@ -1,60 +1,5 @@
 turning_fall_header = true
 
-table.insert(editor_objlist_order, "text_turning_fall")
-table.insert(editor_objlist_order, "text_turning_nudge")
-table.insert(editor_objlist_order, "text_turning_dir")
-table.insert(editor_objlist_order, "text_turning_locked")
-editor_objlist["text_turning_fall"] = 
-{
-	name = "text_turning_fall",
-	sprite_in_root = false,
-	unittype = "text",
-	tags = {"text, abstract"},
-	tiling = 3,
-	type = 2,
-	layer = 20,
-	colour = {5, 1},
-    colour_active = {5, 3},
-}
-editor_objlist["text_turning_nudge"] = 
-{
-	name = "text_turning_nudge",
-	sprite_in_root = false,
-	unittype = "text",
-	tags = {"text, abstract"},
-	tiling = 3,
-	type = 2,
-	layer = 20,
-	colour = {5, 1},
-    colour_active = {5, 3},
-}
-editor_objlist["text_turning_dir"] = 
-{
-	name = "text_turning_dir",
-	sprite_in_root = false,
-	unittype = "text",
-	tags = {"text, abstract"},
-	tiling = 3,
-	type = 2,
-	layer = 20,
-	colour = {1, 3},
-	colour_active = {1, 4},
-}
-editor_objlist["text_turning_locked"] = 
-{
-	name = "text_turning_locked",
-	sprite_in_root = false,
-	unittype = "text",
-	tags = {"text, abstract"},
-	tiling = 3,
-	type = 2,
-	layer = 20,
-	colour = {4, 1},
-    colour_active = {4, 2},
-}
-
-formatobjlist()
-
 is_sound_played = false
  -- collects all turning text unit at the start of every turn. Also keeps track of their starting direction + if they have any directional rules applied to them
 turning_units = {}
@@ -63,7 +8,20 @@ turning_dir_units = {}
 final_turning_unit_dir = {}
 eval_turning_text_global = true
 output_turning_dir_ids = false
-turning_word_names = {fall=true, nudge=true, locked=true, dir=true}
+turning_word_names = {
+    fall=true, 
+    nudge=true, 
+    locked=true, 
+    dir=true, 
+    you=true,
+    you2=true,
+    push=true,
+    pull=true,
+    swap=true,
+    stop=true,
+    shift=true,
+    more=true,
+}
 
 function is_turning_text(name)
     return string.len(name) > 8 and string.sub(name, 1,8) == "turning_" and turning_word_names[string.sub(name, 9)]
@@ -81,6 +39,43 @@ function parse_turning_text(name)
     return nil
 end
 
+function reset_tt()
+    is_sound_played = false
+    turning_units = {}
+
+    turning_dir_units = {}
+    final_turning_unit_dir = {}
+    eval_turning_text_global = true
+    output_turning_dir_ids = false
+end
+
+table.insert( mod_hook_functions["level_start"],
+    function()
+        reset_tt()
+    end
+)
+table.insert( mod_hook_functions["level_restart"],
+    function()
+        reset_tt()
+    end
+)
+
+table.insert( mod_hook_functions["level_end"],
+    function()
+        reset_tt()
+    end
+)
+
+table.insert(mod_hook_functions["levelpack_end"], 
+    function()
+        reset_tt()
+    end
+)
+table.insert(mod_hook_functions["levelpack_done"], 
+    function()
+        reset_tt()
+    end
+)
 
 table.insert( mod_hook_functions["turn_end"], 
     function()

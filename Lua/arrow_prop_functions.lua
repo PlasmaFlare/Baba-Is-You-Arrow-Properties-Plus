@@ -51,6 +51,36 @@ end
 
 group_arrow_properties = true
 
+function reset_arrow()
+	group_arrow_properties = true
+end
+
+table.insert(mod_hook_functions["level_start"], 
+    function()
+        reset_arrow()
+    end
+)
+table.insert(mod_hook_functions["level_end"], 
+    function()
+        reset_arrow()
+    end
+)
+table.insert(mod_hook_functions["level_win"], 
+    function()
+        reset_arrow()
+    end
+)
+table.insert(mod_hook_functions["levelpack_end"], 
+    function()
+        reset_arrow()
+    end
+)
+table.insert(mod_hook_functions["levelpack_done"], 
+    function()
+        reset_arrow()
+    end
+)
+
 
 function do_directional_more(full_more_units, delthese_)
     if full_more_units == nil then
