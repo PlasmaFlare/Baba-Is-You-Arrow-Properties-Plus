@@ -1,13 +1,15 @@
 function movecommand(ox,oy,dir_,playerid_,dir_2)
+	---@Turning Text
 	eval_turning_text_global = false
+	---------------------------
+
 	statusblock(nil,nil,true)
 	movelist = {}
-	
+
 	local take = 1
 	local takecount = 8
 	local finaltake = false
 	local playerid = playerid_ or 1
-	
 	local still_moving = {}
 	
 	local levelpush = -1
@@ -17,6 +19,7 @@ function movecommand(ox,oy,dir_,playerid_,dir_2)
 	local levelmove = {}
 	local levelmove2 = {}
 	
+	group_arrow_properties = false
 	if (playerid == 1) then
 		levelmove = findfeature("level","is","you")
 	elseif (playerid == 2) then
@@ -47,6 +50,13 @@ function movecommand(ox,oy,dir_,playerid_,dir_2)
 			levelmove = nil
 		end
 	end
+	group_arrow_properties = true
+
+	-- @Turning Text(YOU) ----------------------------------------
+	if levelmove == nil then
+		levelmove = do_directional_you_level(dir_, playerid)
+	end
+	----------------------------------------------------
 	
 	if (levelmove ~= nil) then
 		local valid = false
@@ -93,12 +103,18 @@ function movecommand(ox,oy,dir_,playerid_,dir_2)
 				local empty2 = {}
 				local empty3 = {}
 				
+				group_arrow_properties = false
 				if (playerid == 1) then
 					players,empty = findallfeature(nil,"is","you")
 				elseif (playerid == 2) then
 					players,empty = findallfeature(nil,"is","you2")
+					-- @Turning Text(YOU2)
+					group_arrow_properties = true
+					a,b = findallfeature(nil,"is","you2")
+					group_arrow_properties = false
+					--------------------------------------
 					
-					if (#players == 0) then
+					if (#players == 0 and #a == 0) then
 						players,empty = findallfeature(nil,"is","you")
 					end
 				elseif (playerid == 3) then
@@ -113,6 +129,20 @@ function movecommand(ox,oy,dir_,playerid_,dir_2)
 						table.insert(empty, v)
 					end
 				end
+				group_arrow_properties = true
+
+				-- @Turning Text(YOU)
+				playersdir, emptydir = do_directional_you(dir_, playerid)
+				for i,v in ipairs(playersdir) do
+					table.insert(players, v)
+				end
+				
+				for i,v in ipairs(emptydir) do
+					table.insert(empty, v)
+				end
+				--------------------------------------
+				
+				
 				
 				if (featureindex["debugtest"] ~= nil) then
 					players3,empty3 = findallfeature(nil,"is","debugtest")
@@ -217,7 +247,7 @@ function movecommand(ox,oy,dir_,playerid_,dir_2)
 							turndir = -1
 						elseif (dir_ == 2) then
 							turndir = 1
-			end
+						end
 			
 						fdir = (udir + turndir + 4) % 4
 						
@@ -238,7 +268,7 @@ function movecommand(ox,oy,dir_,playerid_,dir_2)
 								updatedir(v, fdir)
 							end
 						end
-			end
+					end
 			
 					if (sleeping == false) and (fdir ~= 4) and domove then
 						if (been_seen[v] == nil) then
@@ -377,31 +407,36 @@ function movecommand(ox,oy,dir_,playerid_,dir_2)
 					end
 				end
 			elseif (take == 8) then
-				local shifts = findallfeature(nil,"is","shift",true)
-				
-				for i,v in ipairs(shifts) do
-					if (v ~= 2) then
-						local affected = {}
-						local unit = mmf.newObject(v)
-						
-						local x,y = unit.values[XPOS],unit.values[YPOS]
-						local tileid = x + y * roomsizex
-						
-						if (unitmap[tileid] ~= nil) then
-							if (#unitmap[tileid] > 1) then
-								for a,b in ipairs(unitmap[tileid]) do
-									if (b ~= v) and floating(b,v,x,y) then
-									
-										--updatedir(b, unit.values[DIR])
+				if enable_directional_shift then
+					--@Turning Text(shift)
+					do_directional_shift_parsing(moving_units, been_seen, roomsizex)
+				else
+					local shifts = findallfeature(nil,"is","shift",true)
+					
+					for i,v in ipairs(shifts) do
+						if (v ~= 2) then
+							local affected = {}
+							local unit = mmf.newObject(v)
+							
+							local x,y = unit.values[XPOS],unit.values[YPOS]
+							local tileid = x + y * roomsizex
+							
+							if (unitmap[tileid] ~= nil) then
+								if (#unitmap[tileid] > 1) then
+									for a,b in ipairs(unitmap[tileid]) do
+										if (b ~= v) and floating(b,v,x,y) then
 										
-										if (isstill_or_locked(b,x,y,unit.values[DIR]) == false) then
-											if (been_seen[b] == nil) then
-												table.insert(moving_units, {unitid = b, reason = "shift", state = 0, moves = 1, dir = unit.values[DIR], xpos = x, ypos = y})
-												been_seen[b] = #moving_units
-											else
-												local id = been_seen[b]
-												local this = moving_units[id]
-												this.moves = this.moves + 1
+											--updatedir(b, unit.values[DIR])
+											
+											if (isstill_or_locked(b,x,y,unit.values[DIR]) == false) then
+												if (been_seen[b] == nil) then
+													table.insert(moving_units, {unitid = b, reason = "shift", state = 0, moves = 1, dir = unit.values[DIR], xpos = x, ypos = y})
+													been_seen[b] = #moving_units
+												else
+													local id = been_seen[b]
+													local this = moving_units[id]
+													this.moves = this.moves + 1
+												end
 											end
 										end
 									end
@@ -411,27 +446,31 @@ function movecommand(ox,oy,dir_,playerid_,dir_2)
 					end
 				end
 				
-				local levelshift = findfeature("level","is","shift")
-				
-				if (levelshift ~= nil) then
-					local leveldir = mapdir
-					local valid = false
+				if enable_directional_shift then
+					do_directional_shift_level_parsing(moving_units, been_seen, mapdir)
+				else
+					local levelshift = findfeature("level","is","shift")
 					
-					for a,b in ipairs(levelshift) do
-						if (valid == false) and testcond(b[2],1) then
-							valid = true
+					if (levelshift ~= nil) then
+						local leveldir = mapdir
+						local valid = false
+						
+						for a,b in ipairs(levelshift) do
+							if (valid == false) and testcond(b[2],1) then
+								valid = true
+							end
 						end
-					end
-					
-					if valid then
-						for a,unit in ipairs(units) do
-							local x,y = unit.values[XPOS],unit.values[YPOS]
-							
-							if floating_level(unit.fixed) then
-								updatedir(unit.fixed, leveldir)
+						
+						if valid then
+							for a,unit in ipairs(units) do
+								local x,y = unit.values[XPOS],unit.values[YPOS]
 								
-								if (isstill_or_locked(unit.fixed,x,y,leveldir) == false) and (issleep(unit.fixed,x,y) == false) then
-									table.insert(moving_units, {unitid = unit.fixed, reason = "shift", state = 0, moves = 1, dir = unit.values[DIR], xpos = x, ypos = y})
+								if floating_level(unit.fixed) then
+									updatedir(unit.fixed, leveldir)
+									
+									if (isstill_or_locked(unit.fixed,x,y,leveldir) == false) and (issleep(unit.fixed,x,y) == false) then
+										table.insert(moving_units, {unitid = unit.fixed, reason = "shift", state = 0, moves = 1, dir = unit.values[DIR], xpos = x, ypos = y})
+									end
 								end
 							end
 						end
@@ -443,7 +482,26 @@ function movecommand(ox,oy,dir_,playerid_,dir_2)
 				if (data.unitid ~= 2) then
 					local unit = mmf.newObject(data.unitid)
 					
-					table.insert(moving_units, {unitid = data.unitid, reason = data.reason, state = data.state, moves = data.moves, dir = unit.values[DIR], xpos = unit.values[XPOS], ypos = unit.values[YPOS]})
+					if enable_directional_shift and data.reason == "shift" then
+						--@Turning Text(shift)
+						table.insert(moving_units, {
+							unitid = data.unitid, 
+							reason = data.reason, 
+							state = data.state, 
+							moves = data.moves, 
+							dir = data.dir, 
+							xpos = unit.values[XPOS], 
+							ypos = unit.values[YPOS],
+
+							horsdir = data.horsdir,
+							vertdir = data.vertdir,
+							horsmove = data.horsmove,
+							vertmove = data.vertmove,
+							dirshiftstate = data.dirshiftstate
+						})
+					else
+						table.insert(moving_units, {unitid = data.unitid, reason = data.reason, state = data.state, moves = data.moves, dir = unit.values[DIR], xpos = unit.values[XPOS], ypos = unit.values[YPOS]})
+					end
 				else
 					table.insert(moving_units, {unitid = data.unitid, reason = data.reason, state = data.state, moves = data.moves, dir = data.dir, xpos = -1, ypos = -1})
 				end
@@ -474,6 +532,11 @@ function movecommand(ox,oy,dir_,playerid_,dir_2)
 		
 		if skiptake then
 			done = true
+		end
+
+		if enable_directional_shift and (finaltake == false) and (take == 8) then
+			--@Turning Text(shift)
+			moving_units = do_directional_shift_resolve_stacked_shifts(moving_units)
 		end
 		
 		while (done == false) and (skiptake == false) do
@@ -516,7 +579,7 @@ function movecommand(ox,oy,dir_,playerid_,dir_2)
 								
 								if cantmove(name,data.unitid,dir,x,y) then
 									skipthis = true
-							end
+								end
 							end
 						elseif (state == 3) then
 							if ((data.reason == "move") or (data.reason == "chill")) then
@@ -536,7 +599,13 @@ function movecommand(ox,oy,dir_,playerid_,dir_2)
 								end
 							end
 						end
-						
+
+						--@Turning Text(shift)
+						if enable_directional_shift and data.reason == "shift" and data.unitid ~= 2 then
+							dir = data.dir
+							do_directional_shift_update_shift_state(data)
+						end
+
 						if (state == 0) and (data.reason == "shift") and (data.unitid ~= 2) then
 							updatedir(data.unitid, data.dir)
 							dir = data.dir
@@ -587,8 +656,16 @@ function movecommand(ox,oy,dir_,playerid_,dir_2)
 							dir = olddir
 						end
 						
+						group_arrow_properties = false
 						local swap = hasfeature(name,"is","swap",data.unitid,x,y)
 						local still = cantmove(name,data.unitid,newdir,x,y)
+						group_arrow_properties = true
+
+						--@Turning Text(SWAP)
+						if not swap then
+							swap = do_directional_swap_hasfeature(dir, name, unitid, x, y)
+						end
+						------------------------------------
 						
 						if returnolddir then
 							dir = newdir
@@ -607,7 +684,9 @@ function movecommand(ox,oy,dir_,playerid_,dir_2)
 								elseif (obs == -1) then
 									result = math.max(result, 2)
 									
+									group_arrow_properties = false
 									local levelpush_ = findfeature("level","is","push")
+									group_arrow_properties = true
 									
 									if (levelpush_ ~= nil) then
 										for e,f in ipairs(levelpush_) do
@@ -616,6 +695,12 @@ function movecommand(ox,oy,dir_,playerid_,dir_2)
 											end
 										end
 									end
+									
+									--@Turning Text(PUSH)
+									if levelpush < 0 then
+										levelpush = do_directional_level_pushpull(dir, false)
+									end
+									-----------------
 								else
 									if (swap == nil) or still then
 										if (#allobs == 0) then
@@ -692,7 +777,23 @@ function movecommand(ox,oy,dir_,playerid_,dir_2)
 										end
 									end
 									
+									group_arrow_properties = false
 									local swaps = findfeatureat(nil,"is","swap",x+ox,y+oy,{"still"})
+									group_arrow_properties = true
+									
+									-- @Turning Text(SWAP) ---------------------------------
+									local arrow_swap_units = do_directional_swap_findfeatureat(dir, swaps, x, y, ox, oy)
+									if #arrow_swap_units > 0 then
+										if swaps == nil then
+											swaps = arrow_swap_units
+										else
+											for i,unit in ipairs(arrow_swap_units) do
+												table.insert(swaps, unit)
+											end
+										end
+									end
+									-------------------------------------------------
+									
 									if (swaps ~= nil) then
 										for a,b in ipairs(swaps) do
 											if (swapped[b] == nil) and (b ~= 2) then
@@ -718,7 +819,9 @@ function movecommand(ox,oy,dir_,playerid_,dir_2)
 												table.insert(finalpullobs, paobs)
 											end
 										elseif (pobs == -1) then
+											group_arrow_properties = false
 											local levelpull_ = findfeature("level","is","pull")
+											group_arrow_properties = true
 										
 											if (levelpull_ ~= nil) then
 												for e,f in ipairs(levelpull_) do
@@ -727,6 +830,12 @@ function movecommand(ox,oy,dir_,playerid_,dir_2)
 													end
 												end
 											end
+
+											-- @Turning Text(PULL)
+											if levelpull < 0 then
+												levelpull = do_directional_level_pushpull(dir, true)
+											end
+											------------------------------
 										end
 									end
 									
@@ -818,7 +927,7 @@ function movecommand(ox,oy,dir_,playerid_,dir_2)
 						solved = true
 					end
 				end
-				
+
 				if solved then
 					data.moves = data.moves - 1
 					
@@ -837,7 +946,26 @@ function movecommand(ox,oy,dir_,playerid_,dir_2)
 						table.insert(delete_moving_units, i)
 					else
 						if (data.unitid ~= 2) or ((data.unitid == 2) and (data.xpos == -1) and (data.ypos == -1)) then
-							table.insert(still_moving, {unitid = data.unitid, reason = data.reason, state = data.state, moves = data.moves, dir = data.dir, xpos = data.xpos, ypos = data.ypos})
+							if enable_directional_shift then
+								--@Turning Text(shift)
+								table.insert(still_moving, {
+									unitid = data.unitid, 
+									reason = data.reason, 
+									state = data.state, 
+									moves = data.moves, 
+									dir = data.dir, 
+									xpos = data.xpos, 
+									ypos = data.ypos,
+
+									horsdir = data.horsdir,
+									vertdir = data.vertdir,
+									horsmove = data.horsmove,
+									vertmove = data.vertmove,
+									dirshiftstate = data.dirshiftstate
+								})
+							else
+								table.insert(still_moving, {unitid = data.unitid, reason = data.reason, state = data.state, moves = data.moves, dir = data.dir, xpos = data.xpos, ypos = data.ypos})
+							end
 						end
 						--MF_alert(tunit.strings[UNITNAME] .. " - removed from queue")
 						table.insert(delete_moving_units, i)
@@ -947,4 +1075,539 @@ function movecommand(ox,oy,dir_,playerid_,dir_2)
 	else
 		visionmode(0)
 	end
+
+end
+
+function check(unitid,x,y,dir,pulling_,reason)
+	local pulling = false
+	if (pulling_ ~= nil) then
+		pulling = pulling_
+	end
+	
+	local dirfeaturevalue = dir
+	local dir_ = dir
+	if pulling then
+		dir_ = rotate(dir)
+	end
+	
+	local ndrs = ndirs[dir_ + 1]
+	local ox,oy = ndrs[1],ndrs[2]
+	
+	local result = {}
+	local results = {}
+	local specials = {}
+	
+	group_arrow_properties = false
+	local emptystop = hasfeature("empty","is","stop",2,x+ox,y+oy)
+	local emptypush = hasfeature("empty","is","push",2,x+ox,y+oy)
+	local emptypull = hasfeature("empty","is","pull",2,x+ox,y+oy)
+	local emptyswap = hasfeature("empty","is","swap",2,x+ox,y+oy)
+	local emptystill = cantmove("empty",2,dir_,x+ox,y+oy)
+	group_arrow_properties = true
+	
+	-- @Turning Text(Push/pull/stop/swap)
+	emptystop, emptypush, emptypull = do_directional_collision(dirfeaturevalue, "empty", 2, emptystop, emptypush, emptypull, x,y,ox,oy, pulling, reason)
+	if dirfeaturevalue ~= nil and dirfeaturevalue >= 0 and dirfeaturevalue <= 3 then
+		local dirfeaturerotate = dirfeaturemap[rotate(dirfeaturevalue) + 1]
+		if not emptyswap then
+			emptyswap = hasfeature("empty","is","swap"..dirfeaturerotate,id,x+ox,y+oy)
+		end
+	end
+	
+	local unit = {}
+	local name = ""
+	
+	if (unitid ~= 2) then
+		unit = mmf.newObject(unitid)
+		name = getname(unit)
+	else
+		name = "empty"
+	end
+	
+	local lockpartner = ""
+	local open = hasfeature(name,"is","open",unitid,x,y)
+	local shut = hasfeature(name,"is","shut",unitid,x,y)
+	local eat = hasfeature(name,"eat",nil,unitid,x,y)
+	local phantom = hasfeature(name,"is","phantom",unitid,x,y)
+	
+	if pulling then
+		phantom = nil
+	end
+	
+	if (open ~= nil) then
+		lockpartner = "shut"
+	elseif (shut ~= nil) then
+		lockpartner = "open"
+	end
+	
+	local obs = findobstacle(x+ox,y+oy)
+	
+	if (#obs > 0) and (phantom == nil) then
+		for i,id in ipairs(obs) do
+			if (id == -1) then
+				table.insert(result, -1)
+				table.insert(results, -1)
+			else
+				local obsunit = mmf.newObject(id)
+				local obsname = getname(obsunit)
+				
+				local alreadymoving = findupdate(id,"update")
+				local valid = true
+				
+				local localresult = 0
+				
+				if (#alreadymoving > 0) then
+					for a,b in ipairs(alreadymoving) do
+						local nx,ny = b[3],b[4]
+						
+						if ((nx ~= x) and (ny ~= y)) and ((reason == "shift") and (pulling == false)) then
+							valid = false
+						end
+						
+						if ((nx == x) and (ny == y + oy * 2)) or ((ny == y) and (nx == x + ox * 2)) then
+							valid = false
+						end
+					end
+				end
+				
+				if (lockpartner ~= "") and (pulling == false) then
+					local partner = hasfeature(obsname,"is",lockpartner,id,x+ox,y+oy)
+					
+					if (partner ~= nil) and ((issafe(id,x+ox,y+oy) == false) or (issafe(unitid,x,y) == false)) and floating(id,unitid,x+ox,y+oy) then
+						valid = false
+						table.insert(specials, {id, "lock"})
+					end
+				end
+				
+				if (eat ~= nil) and (pulling == false) then
+					local eats = hasfeature(name,"eat",obsname,unitid,x+ox,y+oy)
+					
+					if (eats ~= nil) and (issafe(id,x+ox,y+oy) == false) and floating(id,unitid,x+ox,y+oy) then
+						valid = false
+						table.insert(specials, {id, "eat"})
+					end
+				end
+				
+				local weak = hasfeature(obsname,"is","weak",id,x+ox,y+oy)
+				if (weak ~= nil) and (pulling == false) then
+					if (issafe(id,x+ox,y+oy) == false) and floating(id,unitid,x+ox,y+oy) then
+						--valid = false
+						table.insert(specials, {id, "weak"})
+					end
+				end
+				
+				local added = false
+				
+				if valid then
+					--MF_alert("checking for solidity for " .. obsname .. " by " .. name .. " at " .. tostring(x) .. ", " .. tostring(y))
+					group_arrow_properties = false
+					local isstop = hasfeature(obsname,"is","stop",id,x+ox,y+oy)
+					local ispush = hasfeature(obsname,"is","push",id,x+ox,y+oy)
+					local ispull = hasfeature(obsname,"is","pull",id,x+ox,y+oy)
+					local isswap = hasfeature(obsname,"is","swap",id,x+ox,y+oy)
+					local isstill = cantmove(obsname,id,dir,x+ox,y+oy)
+					group_arrow_properties = true
+					
+					-- @Turning Text(Push/pull/stop/swap)
+					isstop, ispush, ispull = do_directional_collision(dirfeaturevalue, obsname, id, isstop, ispush, ispull, x,y,ox,oy, pulling, reason)
+					if dirfeaturevalue ~= nil and dirfeaturevalue >= 0 and dirfeaturevalue <= 3 then
+						local dirfeaturerotate = dirfeaturemap[rotate(dirfeaturevalue) + 1]
+						if not isswap then
+							isswap = hasfeature(obsname,"is","swap"..dirfeaturerotate,id,x+ox,y+oy)
+						end
+					end
+					------------------------------------
+					
+					--MF_alert(obsname .. " -- stop: " .. tostring(isstop) .. ", push: " .. tostring(ispush))
+					
+					if (ispush ~= nil) and isstill then
+						ispush = nil
+						isstop = true
+					end
+					
+					if (ispull ~= nil) and isstill then
+						ispull = nil
+						isstop = true
+					end
+					
+					if (isswap ~= nil) and isstill then
+						isswap = nil
+					end
+					
+					if (isstop ~= nil) and (obsname == "level") and (obsunit.visible == false) then
+						isstop = nil
+					end
+					
+					if (((isstop ~= nil) and (ispush == nil) and ((ispull == nil) or ((ispull ~= nil) and (pulling == false)))) or ((ispull ~= nil) and (pulling == false) and (ispush == nil))) and (isswap == nil) then
+						if (weak == nil) or ((weak ~= nil) and (floating(id,unitid,x+ox,y+oy) == false)) then
+							table.insert(result, 1)
+							table.insert(results, id)
+							localresult = 1
+							added = true
+						end
+					end
+					
+					if (localresult ~= 1) and (localresult ~= -1) then
+						if (ispush ~= nil) and (pulling == false) and (isswap == nil) then
+							--MF_alert(obsname .. " added to push list")
+							table.insert(result, id)
+							table.insert(results, id)
+							added = true
+						end
+						
+						if (ispull ~= nil) and pulling then
+							table.insert(result, id)
+							table.insert(results, id)
+							added = true
+						end
+					end
+				end
+				
+				if (added == false) then
+					table.insert(result, 0)
+					table.insert(results, id)
+				end
+			end
+		end
+	elseif (phantom == nil) then
+		local localresult = 0
+		local valid = true
+		local bname = "empty"
+		
+		if (eat ~= nil) and (pulling == false) then
+			local eats = hasfeature(name,"eat","empty",unitid,x+ox,y+oy)
+			
+			if (eats ~= nil) and (issafe(2,x+ox,y+oy) == false) and floating(unitid,2,x+ox,y+oy) then
+				valid = false
+				table.insert(specials, {2, "eat"})
+			end
+		end
+		
+		if (lockpartner ~= "") and (pulling == false) then
+			local partner = hasfeature("empty","is",lockpartner,2,x+ox,y+oy)
+			
+			if (partner ~= nil) and ((issafe(2,x+ox,y+oy) == false) or (issafe(unitid,x,y) == false)) and floating(unitid,2,x+ox,y+oy) then
+				valid = false
+				table.insert(specials, {2, "lock"})
+			end
+		end
+		
+		local weak = hasfeature("empty","is","weak",2,x+ox,y+oy)
+		if (weak ~= nil) and (pulling == false) then
+			if (issafe(2,x+ox,y+oy) == false) and floating(unitid,2,x+ox,y+oy) then
+				valid = false
+				table.insert(specials, {2, "weak"})
+			end
+		end
+		
+		local added = false
+		
+		if valid then
+			local estop = 0
+			
+			if (emptyswap ~= nil) and emptystill then
+				emptyswap = nil
+			end
+			
+			if (emptypush == nil) and (emptyswap == nil) then
+				if (emptypull ~= nil) and (pulling == false) then
+					estop = 1
+				elseif (emptypull ~= nil) and pulling and emptystill then
+					estop = 1
+				elseif (emptypull == nil) and (emptystop ~= nil) then
+					estop = 1
+				end
+			elseif emptystill then
+				estop = 1
+			end
+			
+			if (estop == 1) then
+				localresult = 1
+				table.insert(result, 1)
+				table.insert(results, 2)
+				added = true
+			end
+			
+			if (localresult ~= 1) then
+				if (emptypush ~= nil) and (pulling == false) and (emptyswap == nil) then
+					table.insert(result, 2)
+					table.insert(results, 2)
+					added = true
+				end
+				
+				if (emptypull ~= nil) and pulling then
+					table.insert(result, 2)
+					table.insert(results, 2)
+					added = true
+				end
+			end
+		end
+		
+		if (added == false) then
+			table.insert(result, 0)
+			table.insert(results, 2)
+		end
+	end
+	
+	if (#results == 0) then
+		result = {0}
+		results = {0}
+	end
+	
+	return result,results,specials
+end
+
+function dopush(unitid,ox,oy,dir,pulling_,x_,y_,reason,pusherid)
+	local pid2 = tostring(ox + oy * roomsizex) .. tostring(unitid)
+	pushedunits[pid2] = 1
+	
+	local x,y = 0,0
+	local unit = {}
+	local name = ""
+	local pushsound = false
+	
+	if (unitid ~= 2) then
+		unit = mmf.newObject(unitid)
+		x,y = unit.values[XPOS],unit.values[YPOS]
+		name = getname(unit)
+	else
+		x = x_
+		y = y_
+		name = "empty"
+	end
+	
+	local pulling = false
+	if (pulling_ ~= nil) then
+		pulling = pulling_
+	end
+	
+	group_arrow_properties = false
+	local swaps = findfeatureat(nil,"is","swap",x+ox,y+oy)
+	group_arrow_properties = true
+	
+	--@Turning Text(SWAP) ------------------------
+	local arrow_swap_units = do_directional_swap_findfeatureat(dir, swaps, x, y, ox, oy)
+	if #arrow_swap_units > 0 then
+		if swaps == nil then
+			swaps = arrow_swap_units
+		else
+			for i,unit in ipairs(arrow_swap_units) do
+				table.insert(swaps, unit)
+			end
+		end
+	end
+	------------------------------
+
+	if (swaps ~= nil) and ((unitid ~= 2) or ((unitid == 2) and (pulling == false))) then
+		for a,b in ipairs(swaps) do
+			if (pulling == false) or (pulling and (b ~= pusherid)) then
+				local alreadymoving = findupdate(b,"update")
+				local valid = true
+				
+				if (#alreadymoving > 0) then
+					valid = false
+				end
+				
+				if valid then
+					addaction(b,{"update",x,y,nil})
+				end
+			end
+		end
+	end
+	
+	if pulling then
+		group_arrow_properties = false
+		local swap = hasfeature(name,"is","swap",unitid,x,y)
+		group_arrow_properties = true
+		
+		--@Turning Text(SWAP) ------------------------
+		if not swap then
+			swap = do_directional_swap_hasfeature(dir, name, unitid, x, y)
+		end
+		------------------------------
+		
+		if swap then
+			local swapthese = findallhere(x+ox,y+oy)
+			
+			for a,b in ipairs(swapthese) do
+				if (b ~= pusherid) then
+					local alreadymoving = findupdate(b,"update")
+					local valid = true
+					
+					if (#alreadymoving > 0) then
+						valid = false
+					end
+					
+					if valid and (b ~= 2) then
+						addaction(b,{"update",x,y,nil})
+						pushsound = true
+					end
+				end
+			end
+		end
+	end
+	
+	local hm = 0
+	local tileid = x + y * roomsizex
+	local moveid = tostring(tileid) .. name .. tostring(dir)
+	
+	if (movemap[moveid] == nil) then
+		movemap[moveid] = {}
+	end
+	
+	if (movemap[moveid]["push"] == nil) then
+		movemap[moveid]["push"] = 0
+		movemap[moveid]["pull"] = 0
+		movemap[moveid]["result"] = 0
+	end
+	
+	local movedata = movemap[moveid]
+	
+	if (HACK_MOVES < 10000) then
+		local hmlist,hms,specials = check(unitid,x,y,dir,false,reason)
+		local pullhmlist,pullhms,pullspecials = check(unitid,x,y,dir,true,reason)
+		local result = 0
+		
+		local weak = hasfeature(name,"is","weak",unitid,x_,y_)
+		
+		if (movedata.result == 0) then
+			for i,obs in pairs(hmlist) do
+				local done = false
+				while (done == false) do
+					if (obs == 0) then
+						result = math.max(0, result)
+						done = true
+					elseif (obs == 1) or (obs == -1) then
+						if (pulling == false) or (pulling and (hms[i] ~= pusherid)) then
+							result = math.max(2, result)
+							done = true
+						else
+							result = math.max(0, result)
+							done = true
+						end
+					else
+						if (pulling == false) or (pulling and (hms[i] ~= pusherid)) then
+							result = math.max(1, result)
+							done = true
+						else
+							result = math.max(0, result)
+							done = true
+						end
+					end
+				end
+			end
+			
+			movedata.result = result + 1
+		else
+			result = movedata.result - 1
+			done = true
+		end
+		
+		local finaldone = false
+		
+		while (finaldone == false) and (HACK_MOVES < 10000) do
+			if (result == 0) then
+				table.insert(movelist, {unitid,ox,oy,dir,specials,x,y})
+				--move(unitid,ox,oy,dir,specials)
+				pushsound = true
+				finaldone = true
+				hm = 0
+				
+				if (pulling == false) and (movedata.pull == 0) then
+					for i,obs in ipairs(pullhmlist) do
+						if (obs < -1) or (obs > 1) and (obs ~= pusherid) then
+							if (obs ~= 2) then
+								table.insert(movelist, {obs,ox,oy,dir,pullspecials,x,y})
+								pushsound = true
+								--move(obs,ox,oy,dir,specials)
+							end
+							
+							local pid = tostring(x-ox + (y-oy) * roomsizex) .. tostring(obs)
+							
+							if (pushedunits[pid] == nil) then
+								pushedunits[pid] = 1
+								
+								hm = dopush(obs,ox,oy,dir,true,x-ox,y-oy,reason,unitid)
+							end
+							
+							movedata.pull = 1
+						end
+					end
+				end
+			elseif (result == 1) then
+				if (movedata.push == 0) then
+					for i,v in ipairs(hmlist) do
+						if (v ~= -1) and (v ~= 0) and (v ~= 1) then
+							local pid = tostring(x+ox + (y+oy) * roomsizex) .. tostring(v)
+							
+							if (pulling == false) or (pulling and (hms[i] ~= pusherid)) and (pushedunits[pid] == nil) then
+								pushedunits[pid] = 1
+								hm = dopush(v,ox,oy,dir,false,x+ox,y+oy,reason,unitid)
+							end
+						end
+					end
+				else
+					hm = movedata.push - 1
+				end
+				
+				movedata.push = hm + 1
+				
+				if (hm == 0) then
+					result = 0
+				else
+					result = 2
+				end
+			elseif (result == 2) then
+				hm = 1
+				
+				if (weak ~= nil) then
+					delete(unitid,x,y)
+					
+					local pmult,sound = checkeffecthistory("weak")
+					setsoundname("removal",1,sound)
+					generaldata.values[SHAKE] = 3
+					MF_particles("destroy",x,y,5 * pmult,0,3,1,1)
+					result = 0
+					hm = 0
+				end
+				
+				finaldone = true
+			end
+		end
+		
+		if pulling and (HACK_MOVES < 10000) then
+			if (movedata.pull == 0) then
+				hmlist,hms,specials = check(unitid,x,y,dir,pulling,reason)
+				hm = 0
+			
+				for i,obs in pairs(hmlist) do
+					if (obs < -1) or (obs > 1) then
+						if (obs ~= 2) then
+							table.insert(movelist, {obs,ox,oy,dir,specials,x,y})
+							pushsound = true
+						end
+						
+						local pid = tostring(x - ox + (y - oy) * roomsizex) .. tostring(obs)
+						
+						if (pushedunits[pid] == nil) then
+							pushedunits[pid] = 1
+							hm = dopush(obs,ox,oy,dir,pulling,x-ox,y-oy,reason,unitid)
+						end
+					end
+				end
+				
+				movedata.pull = hm + 1
+			else
+				hm = movedata.pull - 1
+			end
+		end
+		
+		if pushsound and (generaldata2.strings[TURNSOUND] == "") then
+			setsoundname("turn",5)
+		end
+	end
+	
+	HACK_MOVES = HACK_MOVES + 1
+	
+	return hm
 end
