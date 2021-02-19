@@ -54,7 +54,7 @@ function movecommand(ox,oy,dir_,playerid_,dir_2)
 
 	-- @Turning Text(YOU) ----------------------------------------
 	if levelmove == nil then
-		levelmove = do_directional_you_level(dir_, playerid)
+		levelmove = do_directional_you_level(dir_, dir_2, playerid)
 	end
 	----------------------------------------------------
 	
@@ -132,12 +132,26 @@ function movecommand(ox,oy,dir_,playerid_,dir_2)
 				group_arrow_properties = true
 
 				-- @Turning Text(YOU)
-				playersdir, emptydir = do_directional_you(dir_, playerid)
+				local playersdir = {}
+				local emptydir = {} 
+				local players2dir = {}
+				local empty2dir = {}
+				playersdir, emptydir, players2dir, empty2dir = do_directional_you(dir_, dir_2, playerid)
 				for i,v in ipairs(playersdir) do
 					table.insert(players, v)
 				end
 				
 				for i,v in ipairs(emptydir) do
+					table.insert(empty, v)
+				end
+
+				for i,v in ipairs(players2dir) do
+					table.insert(players2, v)
+					table.insert(players, v)
+				end
+				
+				for i,v in ipairs(empty2dir) do
+					table.insert(empty2, v)
 					table.insert(empty, v)
 				end
 				--------------------------------------

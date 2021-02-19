@@ -220,39 +220,50 @@ function do_directional_swap_findfeatureat(dir, full_swap_units, x, y, ox, oy)
 	return result
 end
 
-function do_directional_you(dir_, playerid)
+function do_directional_you(dir_, dir_2, playerid)
 	local playersdir = {}
 	local emptydir = {}
-	if dir_~= nil and dir_ >= 0 and dir_ <= 3 then
-		local dirfeature = dirfeaturemap[dir_ + 1]
-		local playersdir2 = {}
-		local emptydir2 = {}
+	local playersdir2 = {}
+	local emptydir2 = {}
+	local dirfeature = nil
+	local dirfeature2 = nil
+	if dir_ ~= nil and dir_ >= 0 and dir_ <= 3 then
+		dirfeature = dirfeaturemap[dir_ + 1]
+	end
+	if dir_2 ~= nil and dir_2 >= 0 and dir_2 <= 3 then
+		dirfeature2 = dirfeaturemap[dir_2 + 1]
+	end
 
-		if (playerid == 1) then
+	if (playerid == 1) then
+		if dirfeature ~= nil then
 			playersdir,emptydir = findallfeature(nil,"is","you"..dirfeature)
-		elseif (playerid == 2) then
+		end
+	elseif (playerid == 2) then
+		if (dirfeature ~= nil) then
 			playersdir,emptydir = findallfeature(nil,"is","you2"..dirfeature)
 			
 			if (#playersdir == 0) then
-				playersdir,emptydir = findallfeature(nil,"is","you"..dirfeature)
-			end
-		elseif (playerid == 3) then
-			playersdir,emptydir = findallfeature(nil,"is","you"..dirfeature)
-			playersdir2,emptydir2 = findallfeature(nil,"is","you2"..dirfeature)
-			
-			for i,v in ipairs(playersdir2) do
-				table.insert(playersdir, v)
-			end
-			
-			for i,v in ipairs(emptydir2) do
-				table.insert(emptydir, v)
+				local prev_group_arrow_properties = group_arrow_properties
+				group_arrow_properties = true
+				local you2units, you2emptyunits = findallfeature(nil, "is", "you2")
+				group_arrow_properties = prev_group_arrow_properties
+				if #you2units == 0 then
+					playersdir,emptydir = findallfeature(nil,"is","you"..dirfeature)
+				end
 			end
 		end
+	elseif (playerid == 3) then
+		if dirfeature ~= nil then
+			playersdir,emptydir = findallfeature(nil,"is","you"..dirfeature)
+		end
+		if dirfeature2 ~= nil then
+			playersdir2,emptydir2 = findallfeature(nil,"is","you2"..dirfeature2)
+		end
 	end
-	return playersdir, emptydir
+	return playersdir, emptydir, playersdir2, emptydir2
 end
 
-function do_directional_you_level(dir_, playerid)
+function do_directional_you_level(dir_, dir_2, playerid)
 	local levelmove = nil
 	if dir_~= nil and dir_ >= 0 and dir_ <= 3 then
 		local dirfeature = dirfeaturemap[dir_ + 1]
