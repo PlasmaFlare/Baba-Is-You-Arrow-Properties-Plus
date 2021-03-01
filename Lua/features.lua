@@ -29,7 +29,7 @@ function findfeature(rule1,rule2,rule3)
 		end
 	end
 	
-	if (featureindex[rule3] ~= nil) then
+	if (featureindex[rule3] ~= nil) and (featureindex[rule1] == nil) then
 		for i,rules in ipairs(featureindex[rule3]) do
 			local rule = rules[1]
 			local conds = rules[2]
@@ -41,7 +41,6 @@ function findfeature(rule1,rule2,rule3)
 				end
 			end
         end
-        
 	end
     --@Turning Text --------------------
     if group_arrow_properties and arrow_properties[rule3] then
@@ -211,7 +210,7 @@ function getunitswitheffect(rule3,nolevels_,ignorethese_)
 			local rule = v[1]
 			local conds = v[2]
 			
-			if (rule[2] == "is") and (conds[1] ~= "never") and (rule[1] ~= "all") and (rule[1] ~= "group") then
+			if (rule[2] == "is") and (conds[1] ~= "never") and (findnoun(rule[1],nlist.brief) == false) then
 				table.insert(group, {rule[1], conds})
 			end
 		end

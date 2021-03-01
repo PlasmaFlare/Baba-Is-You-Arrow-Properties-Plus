@@ -9,6 +9,8 @@ Best if you look at some gifs for a full explaination:
 <img src="arrow_properties.gif" alt="drawing" width="800"/>
 
 # Changelog
+- **1.1.0** (2/28/21)
+  - Updated for beta 398
 - **1.1.0** (2/11/21)
   - Updated for beta 394
   - New arrow properties! You, You2, Push, Pull, Stop, Swap, More and Shift

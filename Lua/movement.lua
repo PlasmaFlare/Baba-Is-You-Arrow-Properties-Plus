@@ -114,7 +114,7 @@ function movecommand(ox,oy,dir_,playerid_,dir_2)
 					group_arrow_properties = false
 					--------------------------------------
 					
-					if (#players == 0 and #a == 0) then
+					if (#players == 0) then
 						players,empty = findallfeature(nil,"is","you")
 					end
 				elseif (playerid == 3) then
@@ -242,11 +242,13 @@ function movecommand(ox,oy,dir_,playerid_,dir_2)
 				
 				fdir = 4
 				
-				for i,v in ipairs(players3) do
+				if (featureindex["3d"] ~= nil) and (spritedata.values[CAMTARGET] ~= 0) then
 					local sleeping = false
 					local domove = false
 					local turndir = 0
 					local ox,oy = 0,0
+
+					local v = MF_getfixed(spritedata.values[CAMTARGET])
 					
 					if (v ~= 2) then
 						local unit = mmf.newObject(v)
@@ -1082,7 +1084,7 @@ function movecommand(ox,oy,dir_,playerid_,dir_2)
 		mapcursor_move(ox,oy,dir_)
 	end
 	
-	local vistest,vt2 = findallfeature(nil,"is","debugtest")
+	local vistest,vt2 = findallfeature(nil,"is","3d")
 	if (#vistest > 0) or (#vt2 > 0) then
 		local target = vistest[1] or vt[1]
 		visionmode(1,target,nil)

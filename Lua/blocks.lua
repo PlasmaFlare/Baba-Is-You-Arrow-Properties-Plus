@@ -713,8 +713,13 @@ function block(small_)
 	
 	local isyou = getunitswitheffect("you",false,delthese)
 	local isyou2 = getunitswitheffect("you2",false,delthese)
+	local isyou3 = getunitswitheffect("3d",false,delthese)
 	
 	for i,v in ipairs(isyou2) do
+		table.insert(isyou, v)
+	end
+	
+	for i,v in ipairs(isyou3) do
 		table.insert(isyou, v)
 	end
 	
@@ -894,7 +899,7 @@ function block(small_)
 					end
 					
 					if domake then
-						if (v ~= "empty") and (v ~= "all") and (v ~= "text") and (v ~= "group") then
+						if (findnoun(v,nlist.short) == false) then
 							create(v,x,y,dir,x,y,nil,nil,leveldata)
 						elseif (v == "text") then
 							if (name ~= "text") and (name ~= "all") then
@@ -909,6 +914,7 @@ function block(small_)
 		
 		for i,unit in ipairs(doned) do
 			addundo({"done",unit.strings[UNITNAME],unit.values[XPOS],unit.values[YPOS],unit.values[DIR],unit.values[ID],unit.fixed,unit.values[FLOAT]})
+			updateundo = true
 			
 			unit.values[FLOAT] = 2
 			unit.values[EFFECTCOUNT] = math.random(-10,10)
@@ -923,8 +929,13 @@ function block(small_)
 	
 	isyou = getunitswitheffect("you",false,delthese)
 	isyou2 = getunitswitheffect("you2",false,delthese)
+	isyou3 = getunitswitheffect("3d",false,delthese)
 	
 	for i,v in ipairs(isyou2) do
+		table.insert(isyou, v)
+	end
+	
+	for i,v in ipairs(isyou3) do
 		table.insert(isyou, v)
 	end
 	
