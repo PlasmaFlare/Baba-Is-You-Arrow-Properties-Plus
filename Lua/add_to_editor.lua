@@ -53,6 +53,12 @@ table.insert(editor_objlist_order, "text_shiftup")
 table.insert(editor_objlist_order, "text_shiftleft")
 table.insert(editor_objlist_order, "text_turning_shift")
 
+table.insert(editor_objlist_order, "text_selectdown")
+table.insert(editor_objlist_order, "text_selectright")
+table.insert(editor_objlist_order, "text_selectup")
+table.insert(editor_objlist_order, "text_selectleft")
+table.insert(editor_objlist_order, "text_turning_select")
+
 editor_objlist["text_turning_fall"] = 
 {
 	name = "text_turning_fall",
@@ -598,5 +604,66 @@ editor_objlist["text_turning_shift"] =
 	colour_active = {1, 3},
 }
 
+-- SELECT
+editor_objlist["text_selectright"] = 
+{
+	name = "text_selectright",
+	sprite_in_root = false,
+	unittype = "text",
+	tags = {"text, abstract"},
+	tiling = -1,
+	type = 2,
+	layer = 20,
+	colour = {2, 3},
+	colour_active = {2, 4},
+}
+editor_objlist["text_selectleft"] = 
+{
+	name = "text_selectleft",
+	sprite_in_root = false,
+	unittype = "text",
+	tags = {"text, abstract"},
+	tiling = -1,
+	type = 2,
+	layer = 20,
+	colour = {2, 3},
+	colour_active = {2, 4},
+}
+editor_objlist["text_selectup"] = 
+{
+	name = "text_selectup",
+	sprite_in_root = false,
+	unittype = "text",
+	tags = {"text, abstract"},
+	tiling = -1,
+	type = 2,
+	layer = 20,
+	colour = {2, 3},
+	colour_active = {2, 4},
+}
+editor_objlist["text_selectdown"] = 
+{
+	name = "text_selectdown",
+	sprite_in_root = false,
+	unittype = "text",
+	tags = {"text, abstract"},
+	tiling = -1,
+	type = 2,
+	layer = 20,
+	colour = {2, 3},
+	colour_active = {2, 4},
+}
+editor_objlist["text_turning_select"] = 
+{
+	name = "text_turning_select",
+	sprite_in_root = false,
+	unittype = "text",
+	tags = {"text, abstract"},
+	tiling = 0,
+	type = 2,
+	layer = 20,
+	colour = {2, 3},
+	colour_active = {2, 4},
+}
 
 formatobjlist()

@@ -21,6 +21,7 @@ turning_word_names = {
     stop=true,
     shift=true,
     more=true,
+    select=true,
 }
 
 function is_turning_text(name)

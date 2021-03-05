@@ -7,7 +7,8 @@ arrow_properties = {
     swap=true,
     stop=true,
     more=true,
-    shift=true,
+	shift=true,
+	select=true,
 }
 arrow_property_display = {
     youright="you (right)",
@@ -42,6 +43,10 @@ arrow_property_display = {
 	shiftup="shift (up)",
 	shiftleft="shift (left)",
 	shiftdown="shift (down)",
+	selectright="select (right)",
+	selectup="select (up)",
+	selectleft="select (left)",
+	selectdown="select (down)",
 }
 
 for name,display in pairs(arrow_property_display) do
@@ -322,6 +327,19 @@ function do_directional_level_pushpull(dir, pull)
 	end
 
 	return leveldir
+end
+
+function do_directional_select(dir_)
+	dirfeature = nil
+	if dir_ ~= nil and dir_ >= 0 and dir_ <= 3 then
+		dirfeature = dirfeaturemap[dir_ + 1]
+	end
+
+	if not dirfeature then
+		return {}
+	else
+		return getunitswitheffect("select"..dirfeature,true)
+	end
 end
 
 function do_directional_shift_parsing(moving_units, been_seen, roomsizex)

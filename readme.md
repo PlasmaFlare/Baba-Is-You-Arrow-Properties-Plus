@@ -10,6 +10,7 @@ Best if you look at some gifs for a full explaination:
 
 # Changelog
 - **1.1.2** (3/5/21)
+  - Added turning select
   - Removed redundant turning text sprites  
 - **1.1.1** (2/28/21)
   - Updated for beta 398
