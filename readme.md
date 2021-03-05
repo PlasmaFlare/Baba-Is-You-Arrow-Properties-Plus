@@ -9,7 +9,9 @@ Best if you look at some gifs for a full explaination:
 <img src="arrow_properties.gif" alt="drawing" width="800"/>
 
 # Changelog
-- **1.1.0** (2/28/21)
+- **1.1.2** (3/5/21)
+  - Removed redundant turning text sprites  
+- **1.1.1** (2/28/21)
   - Updated for beta 398
 - **1.1.0** (2/11/21)
   - Updated for beta 394
