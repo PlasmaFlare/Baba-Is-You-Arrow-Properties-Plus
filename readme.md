@@ -9,6 +9,8 @@ Best if you look at some gifs for a full explaination:
 <img src="arrow_properties.gif" alt="drawing" width="800"/>
 
 # Changelog
+- **1.1.3** (3/10/21)
+  - Fixed game freezing when "level is shift" is formed (bug introduced by official beta update)
 - **1.1.2** (3/5/21)
   - Added turning select
   - Removed redundant turning text sprites  

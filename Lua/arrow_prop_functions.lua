@@ -491,7 +491,7 @@ function do_directional_shift_level_parsing(moving_units, been_seen, mapdir)
 				vertmove = 0,
 				dirshiftstate = 0
 			}
-			update_net_shift_data(shiftdir, moving_unit_data, 0.5)
+			update_net_shift_data(shiftdir, moving_unit_data, 1)
 	
 			table.insert(moving_units, moving_unit_data)
 			been_seen[b] = #moving_units
@@ -499,7 +499,7 @@ function do_directional_shift_level_parsing(moving_units, been_seen, mapdir)
 			local id = been_seen[b]
 			local data = moving_units[id]
 
-			update_net_shift_data(shiftdir, data, 0.5)
+			update_net_shift_data(shiftdir, data, 1)
 		end
 	end
 end
@@ -684,7 +684,7 @@ function do_directional_shift_update_shift_state(data)
 	end
 end
 
-function update_net_shift_data(dir, data, value)
+function update_net_shift_data(dir, data)
 	value = value or 1
 	if dir == 0 then
 		data.horsmove = data.horsmove + value
