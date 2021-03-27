@@ -30,7 +30,7 @@ Best if you look at some gifs for a full explaination:
 
 # Installation
 
-- Requires Steam version on beta version 390 (future beta versions may or may not work depending on how much the base code is changed)
+- Requires Steam version on beta version 398 (future beta versions may or may not work depending on how much the base code is changed)
 
 To install, copy both Lua and Sprites folder into the levelpack you want to include the mod. Make sure the world_data.txt in the levelpack folder has `mods=1` set underneath the `[General]` section.
 
