@@ -1,5 +1,7 @@
 # Baba Is You - Arrow Properties Plus
 
+**BEFORE YOU DOWNLOAD:** to maintain mod compatability within my mods while keeping mod management simple, this repository will not be updated further. Instead, I recommend you download to my baba modpack repository here: https://github.com/PlasmaFlare/plasma-baba-mods. Future updates to this mod will be pushed to this modpack so that mod compatability is less of a hassle.
+
 A Baba Is You mod that adds variants of existing properties as directional arrows. Also adds arrow properties where their meaning changes based on their facing direction.
 
 Best if you look at some gifs for a full explaination:
@@ -9,6 +11,8 @@ Best if you look at some gifs for a full explaination:
 <img src="arrow_properties.gif" alt="drawing" width="800"/>
 
 # Changelog
+- **1.1.4** (4/2/21)
+  - Updated for beta 400b
 - **1.1.3** (3/10/21)
   - Fixed game freezing when "level is shift" is formed (bug introduced by official beta update)
 - **1.1.2** (3/5/21)

@@ -93,6 +93,16 @@ table.insert(mod_hook_functions["levelpack_done"],
     end
 )
 
+table.insert(mod_hook_functions["undoed_after"], 
+    function()
+        --@TT todo- replace this with mod hook for after undo once it has been implemented
+        for i,unitid in ipairs(codeunits) do
+            local unit = mmf.newObject(unitid)
+            set_tt_display_direction(unit)
+        end
+    end
+)
+
 table.insert( mod_hook_functions["turn_end"], 
     function()
         local play_rule_sound = false

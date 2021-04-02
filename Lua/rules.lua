@@ -79,3 +79,4 @@ function codecheck(unitid,ox,oy,cdir_,ignore_end_)
 	
 	return result,letters,justletters
 end
+
